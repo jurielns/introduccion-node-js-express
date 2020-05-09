@@ -1,5 +1,8 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../../mongo/models/users');
+
+const expiresIn = 60 * 10;
 
 const login = async (req, res) => {
     try {
@@ -9,7 +12,18 @@ const login = async (req, res) => {
         if (user) {
             const isOk = await bcrypt.compare(password, user.password);
             if (isOk) {
-                res.status(200).send({ status: 'OK', data: {} });
+                const token = jwt.sign(
+                    { userId: user._id, role: user.role },
+                    process.env.JWT_SECRET,
+                    { expiresIn }
+                );
+                res.status(200).send({
+                    status: 'OK',
+                    data: {
+                        token,
+                        expiresIn,
+                    },
+                });
             } else {
                 res.status(403).send({
                     status: 'INVALID_PASSWORD',
