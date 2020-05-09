@@ -27,9 +27,28 @@ const deleteProduct = (req, res) => {};
 
 const getProducts = async (req, res) => {
     try {
-        const products = await Products.find()
+        const products = await Products.find({
+            price: { $lte: 10 },
+        })
             .populate('user', 'username email data role')
             .select('title description price');
+        res.send({
+            status: 'OK',
+            data: products,
+        });
+    } catch (error) {
+        res.status(500).send({
+            status: 'ERROR',
+            data: error.message,
+        });
+    }
+};
+
+const getProductsByUser = async (req, res) => {
+    try {
+        const products = await Products.find({
+            user: req.params.userId,
+        });
         res.send({
             status: 'OK',
             data: products,
@@ -46,4 +65,5 @@ module.exports = {
     createProduct,
     deleteProduct,
     getProducts,
+    getProductsByUser,
 };
