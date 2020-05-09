@@ -3,8 +3,6 @@ const User = require('../../mongo/models/users');
 
 const createUser = async (req, res) => {
     try {
-        console.log('req.body::', req.body);
-
         const { username, email, password, data } = req.body;
 
         const hash = await bcrypt.hash(password, 15);
@@ -29,7 +27,15 @@ const createUser = async (req, res) => {
             message: 'user created',
         });
     } catch (error) {
-        console.log('error controller', error);
+        if (error.code && error.code === 11000) {
+            res.status(400).send({
+                status: 'ERROR DUPLICATED VALUES',
+                message: error.keyValue,
+            });
+            return;
+        }
+
+        // console.log('error controller', error);
 
         res.status(500).send({
             status: 'ERROR',
