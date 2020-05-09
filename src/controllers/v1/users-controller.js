@@ -97,8 +97,10 @@ const getUsers = (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const { username, email, data, userId } = req.body;
-        await User.findByIdAndUpdate(userId, {
+        console.log('req.sessionData', req.sessionData.userId);
+
+        const { username, email, data } = req.body;
+        await User.findByIdAndUpdate(req.sessionData.userId, {
             username,
             email,
             data,
