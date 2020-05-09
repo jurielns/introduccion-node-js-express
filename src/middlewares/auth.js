@@ -17,7 +17,7 @@ const isAuth = (req, res, next) => {
             const data = jwt.verify(token, process.env.JWT_SECRET);
             console.log('jwt data', data);
 
-            req.sessionData = { userId: data.userId };
+            req.sessionData = { userId: data.userId, role: data.role };
             next();
         } else {
             throw {
@@ -26,13 +26,6 @@ const isAuth = (req, res, next) => {
                 message: 'Missing header token',
             };
         }
-        // const validHost = ['vc', 'localhost'];
-        // console.log('request.hostname', req.hostname);
-        // if (validHost.includes(req.hostname)) {
-        //     next();
-        // } else {
-        //     res.status(403).send({ status: 'ACCESS_DENIED' });
-        // }
     } catch (e) {
         res.status(e.code || 500).send({
             status: e.status || 'ERROR',
@@ -41,4 +34,25 @@ const isAuth = (req, res, next) => {
     }
 };
 
-module.exports = { isValidHostname, isAuth };
+const isAdmin = (req, res, next) => {
+    try {
+        const { role } = req.sessionData;
+        console.log('isAdmin', role);
+
+        if (role !== 'admin') {
+            throw {
+                code: 403,
+                status: 'ACCESS_DENIED',
+                message: 'Invalid role',
+            };
+        }
+        next();
+    } catch (e) {
+        res.status(e.code || 500).send({
+            status: e.status || 'ERROR',
+            message: e.message,
+        });
+    }
+};
+
+module.exports = { isValidHostname, isAuth, isAdmin };
