@@ -14,7 +14,15 @@ const isAuth = (req, res, next) => {
     try {
         const { token } = req.headers;
         if (token) {
-            jwt.verify(token, process.env.JWT_SECRET);
+            const data = jwt.verify(token, process.env.JWT_SECRET);
+
+            if (data.userId !== req.body.userId && data.role !== 'admin') {
+                throw {
+                    code: 403,
+                    status: 'ACCESS_DENIED',
+                    message: 'Missing permission or invalid role',
+                };
+            }
             next();
         } else {
             throw {
